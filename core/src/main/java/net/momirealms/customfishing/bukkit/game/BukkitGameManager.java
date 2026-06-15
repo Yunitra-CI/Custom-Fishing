@@ -714,8 +714,12 @@ public class BukkitGameManager implements GameManager {
                                     + OffsetUtils.getOffsetChars(fishOffset + fish_position)
                                     + AdventureHelper.surroundWithMiniMessageFont((struggling_time > 0 ? strugglingFishImage[struggling_time % strugglingFishImage.length] : fishImage), font)
                                     + OffsetUtils.getOffsetChars(barEffectiveWidth - fish_position - fishIconWidth);
-                            strain = Math.max(0, Math.min(strain, ultimateTension));
-                            hook.getContext().arg(ContextKeys.PROGRESS, tension[(int) ((strain / ultimateTension) * tension.length)]);
+                            strain = Math.clamp(strain, 0, ultimateTension);
+                            if (strain >= ultimateTension) {
+                                hook.getContext().arg(ContextKeys.PROGRESS, tension[tension.length - 1]);
+                            } else {
+                                hook.getContext().arg(ContextKeys.PROGRESS, tension[(int) ((strain / ultimateTension) * tension.length)]);
+                            }
                             SparrowHeart.getInstance().sendTitle(getPlayer(), AdventureHelper.miniMessageToJson(tip != null && !played ? tip : title.render(hook.getContext())), AdventureHelper.miniMessageToJson(bar), 0, 20, 0);
                         }
                     };
