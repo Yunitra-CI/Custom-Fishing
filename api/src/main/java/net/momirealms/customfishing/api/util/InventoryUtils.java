@@ -17,11 +17,13 @@
 
 package net.momirealms.customfishing.api.util;
 
+import net.momirealms.customfishing.api.BukkitCustomFishingPlugin;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -77,8 +79,17 @@ public class InventoryUtils {
         ByteArrayInputStream inputStream;
         try {
             inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(base64));
-        } catch (IllegalArgumentException ignored) {
-            return new ItemStack[]{};
+        } catch (Throwable ignored) {
+            try {
+                inputStream = new ByteArrayInputStream(Base64.getDecoder().decode(
+                        base64.replace("\\n", "")
+                                .replace("\\u003d", "=")
+                                .replaceAll("\\s", "")
+                ));
+            } catch (Throwable t) {
+                BukkitCustomFishingPlugin.getInstance().getPluginLogger().warn("Could not decode base 64 encoded string", t);
+                return new ItemStack[]{};
+            }
         }
         BukkitObjectInputStream dataInput = null;
         try {
